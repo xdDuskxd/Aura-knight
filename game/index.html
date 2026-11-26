@@ -1,0 +1,1165 @@
+<title>Aura Knight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Nunito:wght@700;800;900&display=swap">
+<style>
+/* Layout: a full-screen canvas runner; every menu is a gilded wooden panel floating over the running castle scene. */
+:root {
+  --ink: #120d09;
+  --wood: #3d2b1b;
+  --wood-2: #241910;
+  --gold: #e6bb5a;
+  --gold-deep: #8d6a28;
+  --parch: #f4e7c5;
+  --green: #62c24c;
+  --green-deep: #2c7420;
+  --aura: #b26bff;
+  --gem: #2fd27a;
+  --red: #ef4f4f;
+  --blue: #4aa3ff;
+  --text: #fff5df;
+  --muted: #cdb88d;
+  --f-display: 'Luckiest Guy', Impact, 'Arial Black', sans-serif;
+  --f-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; margin: 0; background: var(--ink); color: var(--text); font-family: var(--f-body); font-weight: 800; overflow: hidden; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+[hidden] { display: none !important; }
+#cv { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--parch); outline-offset: 2px; }
+
+.screen {
+  position: fixed; inset: 0; display: flex; flex-direction: column; gap: 10px;
+  padding-top: max(10px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(10px, env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  overflow-y: auto; background: rgba(12, 7, 3, .58);
+}
+.screen.clear { background: transparent; pointer-events: none; }
+.screen.clear > * { pointer-events: auto; }
+
+/* top resource bar */
+.bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bar .spacer { flex: 1; }
+.res { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 4px 0 10px; border-radius: 10px; background: linear-gradient(var(--wood), var(--wood-2)); border: 2px solid var(--gold-deep); box-shadow: inset 0 0 0 1px rgba(255,220,140,.15); font-variant-numeric: tabular-nums; font-size: 15px; }
+.res b { min-width: 2.5em; }
+.res .plus { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(#7fdc63, var(--green-deep)); border: 1px solid #1c4d14; font-family: var(--f-display); font-size: 18px; line-height: 26px; color: #fff; }
+.res small { color: var(--muted); font-size: 11px; margin-right: 4px; }
+.res:not(:has(.plus)) { padding-right: 10px; }
+.iconbtn { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(#f1c96a, #b4862f); border: 2px solid #6d4f17; box-shadow: 0 3px 0 #4a3510; display: grid; place-items: center; font-family: var(--f-display); font-size: 20px; color: #3a2508; }
+
+.ico { display: inline-block; flex: none; }
+.ico.aura { width: 16px; height: 16px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff 0 14%, #d6a8ff 30%, #7a2fe0 72%); box-shadow: 0 0 8px var(--aura); }
+.ico.gem { width: 12px; height: 12px; margin: 0 2px; transform: rotate(45deg); border-radius: 2px; background: linear-gradient(135deg, #b5ffd4, var(--gem) 55%, #0f7a40); box-shadow: 0 0 6px rgba(47,210,122,.7); }
+.ico.bolt { width: 12px; height: 18px; background: #ffd23f; clip-path: polygon(60% 0, 0 58%, 42% 58%, 30% 100%, 100% 38%, 56% 38%); }
+.ico.ad { padding: 1px 4px; border-radius: 4px; background: #ffd23f; color: #3a2508; font-size: 10px; font-weight: 900; letter-spacing: .04em; }
+
+/* gilded panel */
+.frame { position: relative; background: linear-gradient(170deg, #4a3420, var(--wood-2)); border: 3px solid var(--gold); border-radius: 14px; box-shadow: inset 0 0 0 3px var(--gold-deep), inset 0 0 30px rgba(0,0,0,.55), 0 12px 30px rgba(0,0,0,.5); padding: 14px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 400; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 16px; border-radius: 12px; font-family: var(--f-display); font-size: 18px; letter-spacing: .03em; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35); font-variant-numeric: tabular-nums; }
+.btn.green { background: linear-gradient(#86e06a, var(--green) 45%, var(--green-deep)); border: 2px solid #1f5216; box-shadow: 0 4px 0 #173f10; }
+.btn.gold { background: linear-gradient(#ffe08a, #e0a93a 50%, #a8741d); border: 2px solid #6d4f17; box-shadow: 0 4px 0 #4a3510; color: #3a2508; text-shadow: none; }
+.btn.gem { background: linear-gradient(#59e59b, #18a35a 55%, #0d6b3a); border: 2px solid #0a4a28; box-shadow: 0 4px 0 #083a20; }
+.btn.ad { background: linear-gradient(#5aa9ff, #2f6fd6 55%, #1d4aa0); border: 2px solid #142f66; box-shadow: 0 4px 0 #10264f; }
+.btn.dark { background: linear-gradient(#5a4430, #33251a); border: 2px solid #1a120b; box-shadow: 0 4px 0 #120c07; color: var(--parch); }
+.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.5); }
+.btn:disabled { filter: grayscale(.8) brightness(.7); cursor: default; }
+.btn.poor { filter: saturate(.35) brightness(.85); }
+.btn .sub { font-family: var(--f-body); font-size: 12px; font-weight: 900; opacity: .9; }
+
+/* home */
+#home { justify-content: space-between; }
+.logo { text-align: center; line-height: .9; }
+.logo h1 { font-size: clamp(44px, 9vw, 92px); color: #ffe7a3; -webkit-text-stroke: 2px #4a2a05; text-shadow: 0 5px 0 #5c3608, 0 0 28px rgba(178,107,255,.75); transform: rotate(-2deg); }
+.logo p { margin: 8px 0 0; font-size: clamp(13px, 2vw, 17px); color: var(--parch); text-shadow: 0 2px 4px #000; }
+.home-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.home-actions .btn { min-width: 150px; min-height: 54px; font-size: 22px; }
+.foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 11px; color: var(--muted); }
+.foot .demo { background: rgba(0,0,0,.45); padding: 4px 8px; border-radius: 6px; }
+
+/* levels */
+.worlds { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { padding: 7px 14px; border-radius: 10px; font-family: var(--f-display); font-size: 16px; background: linear-gradient(#5a4430, #33251a); border: 2px solid #1a120b; color: var(--muted); }
+.tab[aria-selected="true"] { background: linear-gradient(#ffe08a, #d39a2e); color: #3a2508; border-color: #6d4f17; }
+.tab:disabled { opacity: .45; }
+.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.lvl { aspect-ratio: 1.25; max-width: 100%; border-radius: 12px; background: linear-gradient(#6b4d2d, #3a2817); border: 2px solid var(--gold-deep); box-shadow: 0 4px 0 #1b120a; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; font-family: var(--f-display); font-size: 24px; }
+.lvl.locked { filter: grayscale(1) brightness(.55); }
+.lvl.boss { border-color: var(--aura); }
+.lvl .s { display: flex; gap: 2px; }
+.star { width: 14px; height: 14px; background: #2a1d12; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.star.on { background: linear-gradient(#fff3a6, #f5b400); }
+.world-name { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.world-name span { color: var(--muted); font-size: 13px; }
+
+/* shop */
+.shop-body { flex: 1; display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 12px; min-height: 0; }
+.showroom { position: relative; border-radius: 14px; overflow: hidden; min-height: 220px; background: radial-gradient(ellipse at 50% 80%, rgba(255,190,90,.25), transparent 60%); }
+#pv { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+.stats { position: absolute; left: 8px; bottom: 8px; right: 8px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.stats span { background: rgba(0,0,0,.55); border: 1px solid rgba(230,187,90,.5); padding: 3px 7px; border-radius: 7px; }
+.shop-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cats { display: flex; gap: 6px; flex-wrap: wrap; }
+.card { flex: 1; display: grid; grid-template-columns: 34px minmax(0, 1fr) 34px; grid-template-rows: auto auto; align-items: center; gap: 8px 6px; }
+.card .nav { height: 60px; border-radius: 10px; font-family: var(--f-display); font-size: 26px; color: var(--gold); background: rgba(0,0,0,.3); }
+.showcase { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; text-align: center; }
+.icon-well { width: 100%; max-width: 100%; height: 96px; border-radius: 10px; background: radial-gradient(ellipse at center, #3c3c48, #101015 75%); border: 2px solid #1a120b; position: relative; }
+#icon { width: 100%; height: 100%; display: block; }
+.count { position: absolute; top: 6px; right: 8px; font-size: 11px; color: var(--muted); }
+.tag { position: absolute; top: 6px; left: 8px; font-size: 10px; padding: 2px 6px; border-radius: 6px; font-weight: 900; letter-spacing: .05em; }
+.tag.p2w { background: var(--red); color: #fff; }
+.tag.own { background: var(--green); color: #102b0a; }
+.showcase h3 { font-size: 24px; color: #ffe7a3; -webkit-text-stroke: 1px #3a2508; }
+.showcase p { margin: 0; color: var(--parch); font-size: 13px; max-width: 42ch; }
+.buy { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.adbtn { flex-direction: column; gap: 3px; padding: 4px 14px 6px; }
+.adbtn .meter { width: 120px; height: 6px; border-radius: 3px; background: rgba(0,0,0,.45); overflow: hidden; }
+.adbtn .meter i { display: block; height: 100%; background: #ffd23f; }
+
+/* gem store */
+.packs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.pack { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 10px 10px; border-radius: 14px; background: linear-gradient(#4a3420, #2a1c10); border: 2px solid var(--gold-deep); text-align: center; }
+.pack.hot { border-color: var(--gold); box-shadow: 0 0 18px rgba(230,187,90,.45); }
+.pack .ribbon { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); white-space: nowrap; background: var(--red); color: #fff; font-size: 11px; font-weight: 900; padding: 2px 8px; border-radius: 6px; letter-spacing: .04em; }
+.pack .amt { font-family: var(--f-display); font-size: 26px; color: #c9ffe0; display: flex; align-items: center; gap: 6px; }
+.pack p { margin: 0; font-size: 12px; color: var(--muted); min-height: 2.6em; }
+.pack .btn { width: 100%; }
+.timer { font-variant-numeric: tabular-nums; color: #ffd23f; }
+
+/* modals */
+.modal { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(5,3,1,.7); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 12px; z-index: 20; overflow-y: auto; }
+.modal .frame { width: min(440px, 100%); display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.modal h2 { font-size: 30px; color: #ffe7a3; -webkit-text-stroke: 1px #3a2508; }
+.modal p { margin: 0; color: var(--parch); }
+.modal .row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.modal .row .btn { flex: 1 1 140px; }
+.big-stars { display: flex; justify-content: center; gap: 8px; }
+.big-stars .star { width: 46px; height: 46px; }
+.big-stars .star.on { animation: pop .45s cubic-bezier(.3,1.8,.5,1) both; }
+.big-stars .star:nth-child(2) { animation-delay: .18s; } .big-stars .star:nth-child(3) { animation-delay: .36s; }
+@keyframes pop { from { transform: scale(0) rotate(-40deg); } to { transform: none; } }
+.tally { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; text-align: left; font-variant-numeric: tabular-nums; background: rgba(0,0,0,.3); border-radius: 10px; padding: 10px 12px; }
+.tally b { display: inline-flex; align-items: center; gap: 5px; justify-content: flex-end; }
+.lose { color: var(--red); }
+
+/* fake ad */
+#ad { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; background: #05060a; padding-top: max(10px, env(safe-area-inset-top, 0px)); padding-bottom: max(10px, env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+#ad .ad-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: #aab; }
+#ad .ad-close { min-width: 44px; min-height: 36px; border-radius: 18px; background: rgba(255,255,255,.12); color: #fff; padding: 0 14px; font-weight: 900; }
+#ad .ad-body { flex: 1; display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; text-align: center; }
+#ad canvas { width: 180px; height: 180px; }
+#ad h2 { font-size: clamp(28px, 6vw, 52px); }
+#ad p { margin: 6px 0 0; font-size: 18px; color: #dde; max-width: 30ch; }
+#ad .ad-cta { margin-top: 14px; }
+#ad .ad-progress { height: 4px; background: rgba(255,255,255,.15); border-radius: 2px; overflow: hidden; }
+#ad .ad-progress i { display: block; height: 100%; width: 0; background: #ffd23f; }
+
+/* in-run hud */
+#hud .bar { justify-content: flex-end; }
+#toast { position: fixed; left: 50%; bottom: max(18px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 60; background: rgba(15,10,5,.92); border: 2px solid var(--gold); border-radius: 12px; padding: 9px 16px; max-width: calc(100% - 32px); text-align: center; pointer-events: none; transition: opacity .25s; }
+
+@media (max-width: 640px) and (orientation: portrait) {
+  .shop-body { grid-template-columns: minmax(0, 1fr); }
+  .showroom { min-height: 200px; }
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-height: 420px) {
+  .screen { gap: 6px; }
+  .icon-well { height: 70px; }
+  .showcase h3 { font-size: 20px; }
+  .showcase p { font-size: 12px; }
+  .lvl { aspect-ratio: 1.6; font-size: 20px; }
+  .logo h1 { font-size: clamp(40px, 12vh, 80px); }
+}
+@media (prefers-reduced-motion: reduce) { .big-stars .star.on { animation: none; } }
+</style>
+
+<canvas id="cv" aria-label="Aura Knight game"></canvas>
+
+<section id="home" class="screen">
+  <div class="bar"><div class="spacer"></div><div data-bar></div></div>
+  <div class="logo"><h1>Aura Knight</h1><p>Farm aura. Slash brainrot. Never be an NPC.</p></div>
+  <div class="home-actions">
+    <button class="btn green" id="b-play">Play</button>
+    <button class="btn gold" id="b-shop">Armory</button>
+    <button class="btn gem" id="b-gems"><i class="ico gem"></i>Gem shop</button>
+  </div>
+  <div class="foot">
+    <button class="btn dark" id="b-mute" style="min-height:34px;font-size:14px">Sound on</button>
+    <span class="demo">Demo build · ads and purchases are simulated, no real money</span>
+  </div>
+</section>
+
+<section id="levels" class="screen" hidden>
+  <div class="bar"><button class="iconbtn" data-back aria-label="Back">‹</button><div class="spacer"></div><div data-bar></div></div>
+  <div class="frame" style="display:flex;flex-direction:column;gap:10px">
+    <div class="worlds" id="worlds" role="tablist"></div>
+    <div class="world-name"><h2 id="wname"></h2><span>Each run costs 1 <i class="ico bolt" style="vertical-align:-3px"></i> energy</span></div>
+    <div class="grid" id="lgrid"></div>
+  </div>
+</section>
+
+<section id="shop" class="screen" hidden>
+  <div class="bar"><button class="iconbtn" data-back aria-label="Back">‹</button><h2 style="font-size:24px">Armory</h2><div class="spacer"></div><div data-bar></div></div>
+  <div class="shop-body">
+    <div class="showroom"><canvas id="pv"></canvas><div class="stats" id="stats"></div></div>
+    <div class="shop-panel frame">
+      <div class="cats" id="cats" role="tablist"></div>
+      <div class="card">
+        <button class="nav" id="prev" aria-label="Previous item">‹</button>
+        <div class="showcase">
+          <div class="icon-well"><canvas id="icon"></canvas><span class="count" id="count"></span><span class="tag" id="tag" hidden></span></div>
+          <h3 id="iname"></h3>
+          <p id="idesc"></p>
+        </div>
+        <button class="nav" id="next" aria-label="Next item">›</button>
+        <div class="buy" id="buy"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gems" class="screen" hidden>
+  <div class="bar"><button class="iconbtn" data-back aria-label="Back">‹</button><h2 style="font-size:24px">Gem shop</h2><div class="spacer"></div><div data-bar></div></div>
+  <div class="packs" id="packs"></div>
+</section>
+
+<section id="hud" class="screen clear" hidden>
+  <div class="bar"><button class="iconbtn" id="b-pause" aria-label="Pause">II</button></div>
+</section>
+
+<div class="modal" id="modal" hidden><div class="frame" id="mbody"></div></div>
+
+<div id="ad" hidden>
+  <div class="ad-top"><span id="ad-label">Ad · simulated</span><button class="ad-close" id="ad-close" disabled>5</button></div>
+  <div class="ad-progress"><i id="ad-bar"></i></div>
+  <div class="ad-body">
+    <canvas id="ad-cv" width="360" height="360"></canvas>
+    <div><h2 id="ad-brand"></h2><p id="ad-line"></p><button class="btn gold ad-cta" id="ad-cta">Install now</button></div>
+  </div>
+</div>
+
+<div id="toast" style="opacity:0"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Aura Knight: an auto-runner with a pay-to-win armory and an ad path.
+   Everything is in this one file so it runs in a browser and inside the
+   Expo app's WebView. The app passes saves in through window.__AK_SAVE__
+   and receives them through window.ReactNativeWebView.postMessage.
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = n => Math.floor(n).toLocaleString('en-US');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const RN = window.ReactNativeWebView;
+const send = msg => { try { RN && RN.postMessage(JSON.stringify(msg)); } catch (e) {} };
+
+/* ---------------- catalog ---------------- */
+const CATS = [['all', 'All'], ['sword', 'Swords'], ['armor', 'Armor'], ['shield', 'Shields'], ['skin', 'Skins']];
+// price: aura = soft currency, gems = premium, ads = number of rewarded ads that unlock it instead
+const ITEMS = [
+  { id: 'stick', cat: 'sword', name: 'Wooden Stick', desc: 'Every legend starts somewhere. This is that somewhere.', price: {}, s: { range: 44, cd: .4 } },
+  { id: 'iron', cat: 'sword', name: 'Iron Sword', desc: 'Longer reach. Mid aura, but honest.', price: { aura: 2000 }, s: { range: 56, cd: .34 } },
+  { id: 'katana', cat: 'sword', name: 'Drip Katana', desc: 'Slashes twice as fast. The drip is a free bonus.', price: { aura: 8000, ads: 8 }, s: { range: 60, cd: .2 } },
+  { id: 'diamond', cat: 'sword', name: 'Diamond Sword', desc: 'Shoots unstoppable magic missiles when you slash.', price: { aura: 20000, gems: 300, ads: 15 }, s: { range: 62, cd: .26, missiles: 1 }, p2w: true },
+  { id: 'sigma', cat: 'sword', name: 'Sigma Blade', desc: 'Three missiles per swing and it slashes by itself. Pure pay to win.', price: { gems: 900 }, s: { range: 72, cd: .2, missiles: 3, auto: true }, p2w: true },
+  { id: 'cardboard', cat: 'armor', name: 'Cardboard Armor', desc: 'Three hearts. Smells like a delivery box.', price: {}, s: { hearts: 3, color: '#b98a52', mult: 1 } },
+  { id: 'chain', cat: 'armor', name: 'Chainmail', desc: 'Four hearts. Jingles when you run.', price: { aura: 3000, ads: 6 }, s: { hearts: 4, color: '#9aa1ad', mult: 1 } },
+  { id: 'plate', cat: 'armor', name: 'Gyatt Plate', desc: 'Five hearts. Built different.', price: { aura: 12000, gems: 200, ads: 12 }, s: { hearts: 5, color: '#5d86c9', mult: 1 } },
+  { id: 'golden', cat: 'armor', name: 'Golden Mewing Armor', desc: 'Six hearts and double aura from everything you collect.', price: { gems: 600 }, s: { hearts: 6, color: '#f1c232', mult: 2 }, p2w: true },
+  { id: 'noshield', cat: 'shield', name: 'No Shield', desc: 'Raw dogging the dungeon.', price: {}, s: { blocks: 0 } },
+  { id: 'mewshield', cat: 'shield', name: 'Mewing Shield', desc: 'Blocks the first hit in every level. Jawline intact.', price: { aura: 5000, ads: 8 }, s: { blocks: 1, color: '#4aa3ff' } },
+  { id: 'bubble', cat: 'shield', name: 'Aura Bubble', desc: 'Blocks three hits in every level. Haters can’t touch you.', price: { gems: 250 }, s: { blocks: 3, color: '#b26bff' }, p2w: true },
+  { id: 'classic', cat: 'skin', name: 'Classic Knight', desc: 'Blue stripes, blue plume. The OG fit.', price: {}, s: { tunic: ['#2f6fd6', '#f4f1e8'], plume: '#2f6fd6' } },
+  { id: 'npc', cat: 'skin', name: 'NPC Grey', desc: 'Blend in. Nobody will notice you. That’s the joke.', price: { aura: 1500 }, s: { tunic: ['#8b8f98', '#6c7079'], plume: '#a7abb3' } },
+  { id: 'sixseven', cat: 'skin', name: 'Six Seven', desc: 'Six. Seven. You know exactly why.', price: { aura: 6767, ads: 5 }, s: { tunic: ['#ff7a1a', '#1b1b1f'], plume: '#ff7a1a' } },
+  { id: 'rizz', cat: 'skin', name: 'Rizz Gold', desc: 'A drip so loud enemies hear it first.', price: { gems: 150 }, s: { tunic: ['#f1c232', '#7a1fa8'], plume: '#ff3fa4' } },
+];
+const byId = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+
+const PACKS = [
+  { id: 'free', gems: 10, label: 'Free gems', desc: 'Watch an ad. Up to 5 times a day.', ad: true },
+  { id: 'starter', gems: 300, label: 'Starter pack', desc: '300 gems + Drip Katana + full energy. One time only.', price: '€2.99', ribbon: 'Only today', starter: true },
+  { id: 'vip', label: 'VIP Rizz Pass', desc: 'No forced ads, double aura, +2 max energy. Forever.', price: '€6.99', ribbon: 'Best for grinders', vip: true },
+  { id: 'p1', gems: 80, label: 'Handful', desc: 'Enough to revive a few times.', price: '€0.99' },
+  { id: 'p2', gems: 500, label: 'Sack', desc: 'Most players pick this one.', price: '€4.99', ribbon: 'Most popular' },
+  { id: 'p3', gems: 1200, label: 'Chest', desc: '20% more gems per euro.', price: '€9.99' },
+  { id: 'p4', gems: 6500, label: 'Vault', desc: 'Buy the Sigma Blade seven times over.', price: '€49.99', ribbon: 'Best value' },
+];
+
+const FAKE_ADS = [
+  { brand: 'Sharko Sneakerini™', line: 'The only sneakers with fins. +67 aura per step.', mascot: 'sharko', bg: ['#0d2b52', '#1f6fb5'], cta: 'Shop now' },
+  { brand: 'Mewing Academy', line: 'Jawline in three days or your aura back.', mascot: 'knight', bg: ['#2a0d3d', '#7a2fe0'], cta: 'Start mewing' },
+  { brand: 'Ohio Real Estate', line: 'Castles that only exist in Ohio. Move in today.', mascot: 'pigeon', bg: ['#3d2a0d', '#c27a1f'], cta: 'Book a viewing' },
+  { brand: 'Cappuccina Twirla Café', line: 'Coffee that does ballet. Ask for the six-seven size.', mascot: 'cappu', bg: ['#3d0d24', '#d64f8f'], cta: 'Order now' },
+  { brand: 'Pigeonardo Rizz School', line: 'Learn rizz from a pigeon. Certified W.', mascot: 'pigeon', bg: ['#0d3d2a', '#1fb57a'], cta: 'Enroll free' },
+];
+
+const WORLDS = [
+  { name: 'Ohio Castle', note: 'Where it all goes wrong', sky: ['#18122a', '#3b2b4f'], wall: '#4b4458', mortar: '#2f2a3a', pillar: '#5d566b', tileA: '#e3ddcf', tileB: '#3b3642', stone: '#221e29', banner: '#c0392b' },
+  { name: 'Rizz Ruins', note: 'Moss, ruins and suspicious pigeons', sky: ['#0f2219', '#25483a'], wall: '#3f5247', mortar: '#28362e', pillar: '#4f6658', tileA: '#d2dcc4', tileB: '#2f3d33', stone: '#18221c', banner: '#d4a017' },
+  { name: 'Sigma Summit', note: 'Only sigmas reach the top', sky: ['#0d1a33', '#2f4f7f'], wall: '#46556e', mortar: '#2b3548', pillar: '#5a6b88', tileA: '#e4eefc', tileB: '#33405a', stone: '#1a2233', banner: '#7a2fe0' },
+];
+const LEVELS = 30;
+
+/* ---------------- save data ---------------- */
+const KEY = 'aura-knight-save-v1';
+function freshSave() {
+  return { v: 1, aura: 300, gems: 15, energy: 5, energyTs: Date.now(), stars: {}, cleared: 0,
+    owned: { stick: 1, cardboard: 1, noshield: 1, classic: 1 },
+    equip: { sword: 'stick', armor: 'cardboard', shield: 'noshield', skin: 'classic' },
+    adProg: {}, adDay: '', adsToday: 0, freeGemAds: 0, vip: false, starter: false, sinceAd: 0,
+    firstSeen: Date.now(), muted: false };
+}
+function loadSave() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) {}
+  if (!raw && typeof window.__AK_SAVE__ === 'string') raw = window.__AK_SAVE__;
+  try { if (raw) { const d = JSON.parse(raw); const s = Object.assign(freshSave(), d); s.owned = Object.assign(freshSave().owned, d.owned); return s; } } catch (e) {}
+  return freshSave();
+}
+let S = loadSave();
+function save() {
+  const raw = JSON.stringify(S);
+  try { localStorage.setItem(KEY, raw); } catch (e) {}
+  send({ type: 'save', data: raw });
+}
+function dailyReset() {
+  const today = new Date().toDateString();
+  if (S.adDay !== today) { S.adDay = today; S.adsToday = 0; S.freeGemAds = 0; save(); }
+}
+
+/* ---------------- energy ---------------- */
+const REGEN = 10 * 60 * 1000;
+const AD_CAP = 30;
+const maxEnergy = () => S.vip ? 7 : 5;
+function tickEnergy() {
+  const now = Date.now();
+  if (S.energy >= maxEnergy()) { S.energyTs = now; return; }
+  const n = Math.floor((now - S.energyTs) / REGEN);
+  if (n > 0) {
+    S.energy = Math.min(maxEnergy(), S.energy + n);
+    S.energyTs = S.energy >= maxEnergy() ? now : S.energyTs + n * REGEN;
+    save();
+  }
+}
+function energyLeftMs() { return S.energy >= maxEnergy() ? 0 : Math.max(0, REGEN - (Date.now() - S.energyTs)); }
+const hm = ms => { const m = Math.max(0, Math.floor(ms / 60000)); return Math.floor(m / 60) + 'h ' + String(m % 60).padStart(2, '0') + 'm'; };
+const mmss = ms => { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+
+/* ---------------- sound ---------------- */
+let AC = null;
+const SFX = { jump: [480, 760, .1, 'square'], slash: [320, 110, .09, 'sawtooth'], coin: [900, 1400, .07, 'triangle'], hit: [200, 60, .25, 'square'], block: [700, 700, .14, 'triangle'], kill: [380, 920, .12, 'square'], win: [520, 1040, .45, 'triangle'], gem: [1200, 1800, .12, 'sine'] };
+function sfx(k) {
+  if (S.muted) return;
+  try {
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    const [f0, f1, d, type] = SFX[k], t = AC.currentTime;
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + d);
+    g.gain.setValueAtTime(.05, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d + .02);
+  } catch (e) {}
+}
+
+/* ---------------- canvas ---------------- */
+const cv = $('#cv'), cx = cv.getContext('2d');
+let SC = 1, W = 640, H = 360;
+const GROUND = 300, GRAV = 1900;
+function resize() {
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(innerWidth * dpr); cv.height = Math.round(innerHeight * dpr);
+  SC = Math.min(cv.height / 360, cv.width / 480);
+  W = cv.width / SC; H = cv.height / SC;
+  if (!$('#shop').hidden) drawPreview();
+}
+addEventListener('resize', resize);
+
+function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+function pickW(r, list) { const tot = list.reduce((a, b) => a + b[1], 0); let v = r() * tot; for (const [k, w] of list) { if ((v -= w) <= 0) return k; } return list[0][0]; }
+
+/* ---------------- drawing: items ---------------- */
+const SWORDS = {
+  stick: { blade: '#8a5a2b', edge: '#b07a42', len: 26, w: 4, guard: '#6b4423' },
+  iron: { blade: '#c3c9d4', edge: '#f2f5fa', len: 30, w: 5, guard: '#5d6270' },
+  katana: { blade: '#e3e7ee', edge: '#ff4fa3', len: 35, w: 3.5, guard: '#1a1a1a' },
+  diamond: { blade: '#4fe8de', edge: '#d4fffb', len: 34, w: 6.5, guard: '#e07a3a', glow: '#4fe8de' },
+  sigma: { blade: '#202026', edge: '#ffcf3f', len: 38, w: 6.5, guard: '#ffcf3f', glow: '#ffcf3f' },
+};
+function drawSword(c, id) { // hilt at origin, blade along -y
+  const s = SWORDS[id];
+  c.fillStyle = '#4a2c14'; c.fillRect(-1.6, 0, 3.2, 8);
+  c.fillStyle = s.guard; c.fillRect(-6.5, -2, 13, 3.2);
+  if (s.glow) { c.shadowColor = s.glow; c.shadowBlur = 10; }
+  c.fillStyle = s.blade;
+  c.beginPath(); c.moveTo(-s.w / 2, -2); c.lineTo(-s.w / 2, -s.len + s.w); c.lineTo(0, -s.len - 2); c.lineTo(s.w / 2, -s.len + s.w); c.lineTo(s.w / 2, -2); c.closePath(); c.fill();
+  c.shadowBlur = 0;
+  c.strokeStyle = s.edge; c.lineWidth = 1.2; c.beginPath(); c.moveTo(s.w / 2 - .6, -3); c.lineTo(s.w / 2 - .6, -s.len + s.w); c.stroke();
+}
+function drawShield(c, id, r) {
+  if (id === 'noshield') return;
+  const col = byId[id].s.color;
+  c.save();
+  if (id === 'bubble') {
+    const g = c.createRadialGradient(0, 0, r * .2, 0, 0, r);
+    g.addColorStop(0, 'rgba(255,255,255,.7)'); g.addColorStop(.6, col); g.addColorStop(1, 'rgba(122,47,224,.6)');
+    c.fillStyle = g; c.shadowColor = col; c.shadowBlur = 12;
+    c.beginPath(); c.arc(0, 0, r, 0, Math.PI * 2); c.fill();
+  } else {
+    c.fillStyle = col; c.strokeStyle = '#1d3e6b'; c.lineWidth = r * .14;
+    c.beginPath(); c.moveTo(-r * .8, -r * .8); c.lineTo(r * .8, -r * .8); c.lineTo(r * .8, 0); c.quadraticCurveTo(r * .6, r * .8, 0, r); c.quadraticCurveTo(-r * .6, r * .8, -r * .8, 0); c.closePath(); c.fill(); c.stroke();
+    c.strokeStyle = '#fff'; c.lineWidth = r * .12; // jawline mark
+    c.beginPath(); c.moveTo(-r * .4, -r * .2); c.lineTo(-r * .1, r * .4); c.lineTo(r * .45, r * .1); c.stroke();
+  }
+  c.restore();
+}
+
+/* the knight: feet at (0,0), about 56 units tall */
+function drawKnight(c, x, y, t, eq, o = {}) {
+  const sk = byId[eq.skin].s, ar = byId[eq.armor].s;
+  const run = o.run !== false, ph = t * 15;
+  c.save(); c.translate(x, y);
+  if (o.scale) c.scale(o.scale, o.scale);
+  if (o.alpha != null) c.globalAlpha = o.alpha;
+  if (o.glow) { const g = c.createRadialGradient(0, -26, 4, 0, -26, 46); g.addColorStop(0, o.glow); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(-50, -76, 100, 100); }
+  const bob = run ? Math.abs(Math.sin(ph)) * -2 : 0;
+  // legs
+  const l = run ? Math.sin(ph) * 6 : 0;
+  c.fillStyle = '#2b2b35';
+  c.fillRect(-7 + l * .6, -13, 5, 11); c.fillRect(2 - l * .6, -13, 5, 11);
+  c.fillStyle = '#c9ced8';
+  c.fillRect(-9 + l, -3, 8, 4); c.fillRect(1 - l, -3, 8, 4);
+  c.translate(0, bob);
+  // wind-up key on the back
+  c.save(); c.translate(-13, -25); c.fillStyle = '#d4a017'; c.fillRect(-6, -1.5, 6, 3);
+  const k = Math.cos(t * 7); c.scale(1, 1); c.fillStyle = '#f1c232';
+  c.beginPath(); c.ellipse(-8, -5, 3, 4.5 * Math.abs(k) + .6, 0, 0, Math.PI * 2); c.fill();
+  c.beginPath(); c.ellipse(-8, 5, 3, 4.5 * Math.abs(k) + .6, 0, 0, Math.PI * 2); c.fill();
+  c.restore();
+  // tunic with stripes
+  c.save(); c.beginPath(); c.roundRect(-10, -33, 20, 22, 4); c.clip();
+  for (let i = 0; i < 5; i++) { c.fillStyle = sk.tunic[i % 2]; c.fillRect(-10 + i * 4, -33, 4, 22); }
+  c.restore();
+  // armor plate
+  c.fillStyle = ar.color; c.globalAlpha *= .92;
+  c.beginPath(); c.roundRect(-9, -33, 18, 10, 3); c.fill();
+  c.beginPath(); c.arc(-9, -30, 4.5, 0, Math.PI * 2); c.arc(9, -30, 4.5, 0, Math.PI * 2); c.fill();
+  c.globalAlpha = o.alpha != null ? o.alpha : 1;
+  c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(-10, -14, 20, 3);
+  // shield on the off arm
+  c.save(); c.translate(-3, -21); drawShield(c, eq.shield, 8); c.restore();
+  // big chibi helmet
+  const helm = eq.armor === 'golden' ? '#f1c232' : '#bfc4cf';
+  c.fillStyle = helm; c.strokeStyle = 'rgba(0,0,0,.35)'; c.lineWidth = 1;
+  c.beginPath(); c.arc(1, -45, 12.5, 0, Math.PI * 2); c.fill(); c.stroke();
+  c.fillStyle = '#16161c'; c.beginPath(); c.roundRect(-1, -48, 14, 4.5, 2); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.5)'; c.beginPath(); c.arc(-4, -51, 3, 0, Math.PI * 2); c.fill();
+  // plume
+  c.fillStyle = sk.plume; c.beginPath(); c.moveTo(-2, -57);
+  c.quadraticCurveTo(-14, -70 + (run ? Math.sin(ph * .5) * 2 : 0), -20, -58); c.quadraticCurveTo(-11, -62, -2, -55); c.fill();
+  // sword arm
+  c.save(); c.translate(8, -22);
+  let ang = -.55;
+  if (o.slash > 0) { const p = 1 - o.slash / .18; ang = -1.9 + p * 3.2; }
+  c.rotate(ang);
+  if (o.slash > 0) { c.save(); c.globalAlpha = .35; c.strokeStyle = '#fff'; c.lineWidth = 6; c.beginPath(); c.arc(0, 0, 30, -Math.PI / 2 - .6, -Math.PI / 2 + .6); c.stroke(); c.restore(); }
+  c.fillStyle = '#c9ced8'; c.beginPath(); c.arc(0, 0, 3.6, 0, Math.PI * 2); c.fill();
+  drawSword(c, eq.sword);
+  c.restore();
+  c.restore();
+}
+
+/* brainrot enemies, drawn around their centre, facing left */
+function drawEnemy(c, type, x, y, t, o = {}) {
+  c.save(); c.translate(x, y);
+  if (o.scale) c.scale(o.scale, o.scale);
+  if (o.dead != null) { c.globalAlpha = Math.max(0, 1 - o.dead * 2); c.rotate(o.dead * 9); }
+  if (type === 'sharko') { // shark in sneakers
+    const s = Math.sin(t * 14) * 4;
+    c.fillStyle = '#f4f4f4'; c.fillRect(-10 + s, 8, 9, 6); c.fillRect(2 - s, 8, 9, 6);
+    c.fillStyle = '#e53e3e'; c.fillRect(-10 + s, 7, 9, 4); c.fillRect(2 - s, 7, 9, 4);
+    c.fillStyle = '#5b7fa6';
+    c.beginPath(); c.moveTo(14, -2); c.lineTo(24, -12); c.lineTo(22, 4); c.closePath(); c.fill();
+    c.beginPath(); c.moveTo(-2, -10); c.lineTo(6, -24); c.lineTo(10, -9); c.closePath(); c.fill();
+    c.beginPath(); c.ellipse(0, 0, 19, 11, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#eef2f7'; c.beginPath(); c.ellipse(-3, 4, 14, 6, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#111'; c.beginPath(); c.arc(-11, -3, 2.2, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#fff'; c.beginPath(); c.moveTo(-17, 2); for (let i = 0; i < 4; i++) { c.lineTo(-15 + i * 3, 5); c.lineTo(-14 + i * 3, 2); } c.fill();
+  } else if (type === 'cappu') { // ballerina cappuccino cup
+    c.strokeStyle = '#333'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-3, 9); c.lineTo(-4, 17); c.moveTo(3, 9); c.lineTo(5, 17); c.stroke();
+    c.fillStyle = '#ff8fc7'; c.beginPath(); c.ellipse(0, 8, 15, 4.5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#f6f1e7'; c.beginPath(); c.moveTo(-11, -12); c.lineTo(11, -12); c.lineTo(8, 9); c.lineTo(-8, 9); c.closePath(); c.fill();
+    c.strokeStyle = '#f6f1e7'; c.lineWidth = 3; c.beginPath(); c.arc(12, -3, 5, -1.4, 1.4); c.stroke();
+    c.fillStyle = '#6b3e1f'; c.beginPath(); c.ellipse(0, -12, 11, 3.5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#f3dcc0'; c.beginPath(); c.ellipse(-2, -12.5, 4, 1.5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#111'; c.beginPath(); c.arc(-4, -4, 1.6, 0, Math.PI * 2); c.arc(3, -4, 1.6, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#ff6fae'; c.beginPath(); c.arc(-6, 0, 1.8, 0, Math.PI * 2); c.arc(5, 0, 1.8, 0, Math.PI * 2); c.fill();
+  } else if (type === 'pigeon') { // the rizzler pigeon
+    const f = Math.sin(t * 20) * 7;
+    c.fillStyle = '#8f96a3'; c.beginPath(); c.ellipse(2, 0, 14, 9, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#6f7684'; c.beginPath(); c.moveTo(0, -2); c.lineTo(14, -6 - f); c.lineTo(10, 2); c.closePath(); c.fill();
+    c.fillStyle = '#7b8290'; c.beginPath(); c.arc(-11, -7, 7, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#f2a23a'; c.beginPath(); c.moveTo(-17, -7); c.lineTo(-23, -5); c.lineTo(-17, -4); c.fill();
+    c.fillStyle = '#111'; c.fillRect(-17, -10, 10, 3.5);
+    c.strokeStyle = '#f1c232'; c.lineWidth = 2; c.beginPath(); c.arc(-9, -2, 6, .3, Math.PI - .3); c.stroke();
+    c.fillStyle = '#5fd3a8'; c.beginPath(); c.arc(-6, -1, 2, 0, Math.PI * 2); c.fill();
+  } else if (type === 'boss') { // Mega Sharko with a crown
+    drawEnemy(c, 'sharko', 0, 0, t, { scale: 2.2 });
+    c.fillStyle = '#f1c232'; c.beginPath(); c.moveTo(-6, -44); c.lineTo(-2, -58); c.lineTo(4, -48); c.lineTo(10, -60); c.lineTo(14, -46); c.closePath(); c.fill();
+  }
+  c.restore();
+}
+
+/* ---------------- level generation ---------------- */
+const EN_SIZE = { sharko: [36, 24], cappu: [24, 30], pigeon: [28, 18], boss: [80, 56] };
+function genLevel(n) {
+  const r = rng(n * 7919 + 13), d = (n - 1) / (LEVELS - 1), w = Math.floor((n - 1) / 10);
+  const L = { n, w, ground: [], plats: [], spikes: [], orbs: [], gems: [], picks: [], en: [], speed: 205 + n * 3.2, boss: n % 10 === 0 };
+  let x = 0;
+  const solid = len => { const last = L.ground[L.ground.length - 1]; if (last && last[1] === x) last[1] += len; else L.ground.push([x, x + len]); x += len; };
+  const orbLine = (x0, k, y, dx = 28) => { for (let i = 0; i < k; i++) L.orbs.push({ x: x0 + i * dx, y }); };
+  const orbArc = (x0, wd, k, h) => { for (let i = 0; i < k; i++) { const q = i / (k - 1); L.orbs.push({ x: x0 + q * wd, y: GROUND - 26 - Math.sin(q * Math.PI) * h }); } };
+  const types = [['sharko', 'pigeon'], ['sharko', 'cappu', 'pigeon'], ['sharko', 'cappu', 'pigeon']][w];
+  const enemy = (ex) => {
+    const t = types[Math.floor(r() * types.length)];
+    const e = { type: t, x: ex, t: r() * 6, hp: t === 'sharko' && w >= 2 ? 2 : 1, dead: null };
+    if (t === 'sharko') { e.vx = -45; e.y = GROUND - 12; }
+    if (t === 'cappu') { e.vx = -25; e.y = GROUND - 15; }
+    if (t === 'pigeon') { e.vx = -65; e.low = r() < .55; e.base = e.low ? GROUND - 22 : GROUND - 66; e.y = e.base; }
+    L.en.push(e);
+  };
+  solid(560); orbLine(280, 6, GROUND - 26);
+  const target = 2300 + n * 250;
+  while (x < target) {
+    const k = pickW(r, [['flat', 2.5], ['pit', 3 + 3 * d], ['spikes', 2 + 2 * d], ['enemy', 3 + 2.5 * d], ['plat', 1 + 2 * d], ['arc', 2], ['double', 3 * d], ['sigma', .35]]);
+    if (k === 'flat') { const len = 150 + r() * 120; orbLine(x + 30, Math.floor(len / 42), GROUND - 26, 30); solid(len); }
+    else if (k === 'pit') { const gw = 60 + r() * (45 + 75 * d); orbArc(x - 10, gw + 20, 5, 70); x += gw; solid(140 + r() * 80); }
+    else if (k === 'spikes') { solid(80); const sw = 32 + Math.floor(r() * (2 + d * 2)) * 16; L.spikes.push({ x, w: sw }); orbArc(x - 24, sw + 48, 4, 78); solid(sw); solid(120 + r() * 60); }
+    else if (k === 'enemy') { solid(60); enemy(x + 180 + r() * 60); if (d > .4 && r() < d) enemy(x + 260 + r() * 60); solid(240 + r() * 70); }
+    else if (k === 'plat') { solid(40); const gw = 230 + r() * 60, x0 = x; x += gw; L.plats.push({ x: x0 + gw / 2 - 55, y: GROUND - 56, w: 110 }); orbLine(x0 + gw / 2 - 42, 4, GROUND - 80, 28); if (r() < .3) L.gems.push({ x: x0 + gw / 2, y: GROUND - 150 }); solid(150); }
+    else if (k === 'arc') { solid(60); orbArc(x + 40, 160, 6, 95); if (r() < .25) L.gems.push({ x: x + 120, y: GROUND - 140 }); solid(240); }
+    else if (k === 'double') { solid(40); x += 70 + r() * 20; solid(70); x += 80 + r() * 30; orbLine(x - 60, 3, GROUND - 100, 26); solid(160); }
+    else if (k === 'sigma') { solid(60); L.picks.push({ x: x + 60, y: GROUND - 60, kind: 'sigma' }); solid(200); }
+  }
+  if (L.boss) { solid(200); L.en.push({ type: 'boss', x: x + 380, y: GROUND - 26, vx: 0, t: 0, hp: 6 + w * 3, max: 6 + w * 3, dead: null, boss: true }); solid(700); }
+  solid(160); L.finish = x; solid(900);
+  return L;
+}
+
+/* ---------------- run state ---------------- */
+let G = null, paused = false, T = 0;
+function gear() {
+  const sw = byId[S.equip.sword].s, ar = byId[S.equip.armor].s, sh = byId[S.equip.shield].s;
+  return { sword: sw, hearts: ar.hearts, mult: ar.mult * (S.vip ? 2 : 1), blocks: sh.blocks };
+}
+function startLevel(n) {
+  tickEnergy();
+  if (S.energy <= 0) { energyModal(); return; }
+  S.energy -= 1; if (S.energy === maxEnergy() - 1) S.energyTs = Date.now();
+  save();
+  const L = genLevel(n), g = gear();
+  G = { L, n, g, state: 'play', hp: g.hearts, maxHp: g.hearts, shield: g.blocks, runAura: 0, runGems: 0, orbsTaken: 0, hits: 0, kills: 0, combo: 0,
+    revives: 0, adRevive: false, pops: [], missiles: [], parts: [], shake: 0, cam: 0, t: 0, bossHp: 0,
+    p: { x: 120, y: GROUND, vy: 0, onGround: true, jumps: 0, coyote: 0, buf: 0, slash: 0, cd: 0, inv: 0, sigma: 0 } };
+  L.orbs.forEach(o => o.taken = false); L.gems.forEach(o => o.taken = false);
+  show('hud'); paused = false;
+  pop('GO!', G.p.x + 60, GROUND - 90, '#ffe7a3', 34);
+}
+function pop(text, x, y, color = '#fff', size = 18) { G && G.pops.push({ text, x, y, color, size, life: 1 }); }
+function onSolid(x) { for (const [a, b] of G.L.ground) if (x + 8 > a && x - 8 < b) return true; return false; }
+
+function jump() {
+  if (!G || G.state !== 'play' || paused) return;
+  const p = G.p;
+  if (p.onGround || p.coyote > 0) { p.vy = -640; p.jumps = 1; p.onGround = false; p.coyote = 0; sfx('jump'); }
+  else if (p.jumps < 2) { p.vy = -580; p.jumps = 2; sfx('jump'); for (let i = 0; i < 6; i++) G.parts.push({ x: p.x, y: p.y, vx: (Math.random() - .5) * 120, vy: Math.random() * 80, life: .4, col: '#d6a8ff' }); }
+  else p.buf = .12;
+}
+function slash() {
+  if (!G || G.state !== 'play' || paused) return;
+  const p = G.p, sw = G.g.sword;
+  if (p.cd > 0) return;
+  p.slash = .18; p.cd = sw.cd; sfx('slash');
+  const m = sw.missiles || 0;
+  for (let i = 0; i < m; i++) G.missiles.push({ x: p.x + 16, y: p.y - 26 + (i - (m - 1) / 2) * 16, life: 1.1 });
+}
+function hurt(fall) {
+  const p = G.p;
+  if (!fall && (p.inv > 0 || p.sigma > 0)) return;
+  if (!fall && G.shield > 0) { G.shield--; p.inv = .8; sfx('block'); pop('MEWING BLOCK', p.x, p.y - 70, '#7cc4ff', 20); return; }
+  G.hp--; G.hits++; G.combo = 0; p.inv = 1.3; G.shake = .3; sfx('hit'); send({ type: 'haptic' });
+  pop(['-1000 AURA', 'NPC MOMENT', 'L + RATIO', 'NOT VERY SIGMA'][G.hits % 4], p.x, p.y - 70, '#ff6262', 22);
+  if (G.hp <= 0) die();
+}
+function respawnAhead() {
+  const p = G.p;
+  const seg = G.L.ground.find(([a, b]) => b > p.x + 30 && b - Math.max(a, p.x) > 60);
+  if (seg) p.x = Math.max(seg[0] + 24, p.x);
+  p.y = GROUND; p.vy = 0; p.onGround = true; p.jumps = 0;
+}
+function die() { G.state = 'dead'; setTimeout(reviveModal, 450); }
+function killEnemy(e) {
+  e.hp--;
+  if (e.hp > 0) { e.x += e.boss ? 30 : 26; e.flash = .12; pop(e.boss ? 'BONK' : 'HIT', e.x, e.y - 30, '#fff', 16); sfx('block'); return; }
+  e.dead = 0; G.kills++; G.combo++; sfx('kill');
+  const val = (e.boss ? 500 : 25) * G.g.mult;
+  G.runAura += val; pop('+' + val + ' AURA', e.x, e.y - 30, '#d6a8ff', e.boss ? 26 : 17);
+  if (G.combo === 7) { G.runAura += 67 * G.g.mult; pop('SIX SEVEN!! +67', e.x, e.y - 64, '#ff9a3c', 26); }
+  if (e.boss) { pop('BOSS DEFEATED', e.x, e.y - 90, '#ffe7a3', 30); G.shake = .5; }
+  for (let i = 0; i < 12; i++) G.parts.push({ x: e.x, y: e.y, vx: (Math.random() - .5) * 300, vy: -Math.random() * 260, life: .6, col: i % 2 ? '#b26bff' : '#ffe7a3' });
+}
+const overlap = (ax, ay, aw, ah, bx, by, bw, bh) => ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+
+function update(dt) {
+  const L = G.L, p = G.p;
+  G.t += dt;
+  p.inv = Math.max(0, p.inv - dt); p.cd = Math.max(0, p.cd - dt); p.slash = Math.max(0, p.slash - dt);
+  p.sigma = Math.max(0, p.sigma - dt); p.coyote = Math.max(0, p.coyote - dt); p.buf = Math.max(0, p.buf - dt);
+  G.shake = Math.max(0, G.shake - dt);
+  const boss = L.boss && L.en.find(e => e.boss && e.dead == null);
+  const blocked = boss && boss.x - p.x < 52;
+  const spd = blocked ? 0 : L.speed * (p.sigma > 0 ? 1.6 : 1);
+  p.x += spd * dt;
+  const prevY = p.y; const was = p.onGround;
+  p.vy += GRAV * dt; p.y += p.vy * dt; p.onGround = false;
+  if (p.vy >= 0) {
+    if (prevY <= GROUND + 3 && p.y >= GROUND && onSolid(p.x)) { p.y = GROUND; p.vy = 0; p.onGround = true; }
+    else for (const pl of L.plats) if (p.x + 8 > pl.x && p.x - 8 < pl.x + pl.w && prevY <= pl.y + 3 && p.y >= pl.y) { p.y = pl.y; p.vy = 0; p.onGround = true; break; }
+  }
+  if (p.onGround) { p.jumps = 0; if (p.buf > 0) { p.buf = 0; jump(); } }
+  else if (was && p.vy >= 0) p.coyote = .09;
+  if (p.y > 430) { hurt(true); if (G.state === 'play') respawnAhead(); }
+  // spikes
+  if (p.onGround && p.y === GROUND) for (const s of L.spikes) if (p.x + 7 > s.x + 4 && p.x - 7 < s.x + s.w - 4) hurt(false);
+  // pickups
+  const mult = G.g.mult;
+  for (const o of L.orbs) if (!o.taken && Math.abs(o.x - p.x) < 18 && Math.abs(o.y - (p.y - 22)) < 30) { o.taken = true; G.orbsTaken++; G.runAura += 10 * mult; sfx('coin'); }
+  for (const o of L.gems) if (!o.taken && Math.abs(o.x - p.x) < 20 && Math.abs(o.y - (p.y - 22)) < 32) { o.taken = true; G.runGems++; sfx('gem'); pop('+1 GEM', o.x, o.y - 20, '#7dffb0', 20); }
+  for (const o of L.picks) if (!o.taken && Math.abs(o.x - p.x) < 20 && Math.abs(o.y - (p.y - 22)) < 34) { o.taken = true; p.sigma = 3; pop('SIGMA MODE', p.x, p.y - 80, '#ffd23f', 26); sfx('win'); }
+  // missiles
+  for (const m of G.missiles) { m.x += (L.speed + 440) * dt; m.life -= dt; }
+  G.missiles = G.missiles.filter(m => m.life > 0);
+  // enemies
+  const sw = G.g.sword;
+  for (const e of L.en) {
+    if (e.dead != null) { e.dead += dt; e.y -= 120 * dt; continue; }
+    if (e.x - G.cam > W + 80) continue;
+    e.t += dt; e.flash = Math.max(0, (e.flash || 0) - dt);
+    if (e.boss) { // Mega Sharko winds up, then lunges at you and backs off
+      const ph = e.t % 2.6;
+      e.vx = ph >= 2 && ph < 2.3 ? -190 : ph >= 2.3 ? 190 : 0;
+      if (ph >= 1.55 && ph - dt < 1.55) pop('!!', e.x, e.y - 70, '#ff6262', 30);
+    }
+    e.x += e.vx * dt;
+    if (e.type === 'cappu') e.y = GROUND - 15 - Math.abs(Math.sin(e.t * 3.2)) * 62;
+    if (e.type === 'pigeon') e.y = e.base + Math.sin(e.t * 4) * 5;
+    const [ew, eh] = EN_SIZE[e.type];
+    const ex = e.x - ew / 2, ey = e.y - eh / 2;
+    if (sw.auto && p.cd <= 0 && e.x > p.x && e.x - p.x < sw.range + 10) slash();
+    if (p.slash > 0 && overlap(p.x - 4, p.y - 60, sw.range + 6, 64, ex, ey, ew, eh) && !e.hitBy) { e.hitBy = p.slash; killEnemy(e); }
+    if (p.slash <= 0) e.hitBy = 0;
+    for (const m of G.missiles) if (m.life > 0 && overlap(m.x - 8, m.y - 5, 16, 10, ex, ey, ew, eh)) { m.life = 0; killEnemy(e); break; }
+    if (e.dead == null && overlap(p.x - 9, p.y - 50, 18, 48, ex + 4, ey + 3, ew - 8, eh - 6)) {
+      if (p.sigma > 0) killEnemy(e); else { hurt(false); if (e.boss) p.x -= 40; }
+    }
+    if (G.state !== 'play') return;
+  }
+  // particles and popups
+  for (const q of G.parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vy += 600 * dt; q.life -= dt; }
+  G.parts = G.parts.filter(q => q.life > 0);
+  for (const q of G.pops) { q.y -= 40 * dt; q.life -= dt * .8; }
+  G.pops = G.pops.filter(q => q.life > 0);
+  G.cam = p.x - W * .28;
+  if (p.x >= L.finish) win();
+}
+
+/* ---------------- rendering ---------------- */
+function drawWorld(c, cam, w, top) {
+  const th = WORLDS[w];
+  const g = c.createLinearGradient(0, top, 0, GROUND);
+  g.addColorStop(0, th.sky[0]); g.addColorStop(1, th.sky[1]);
+  c.fillStyle = g; c.fillRect(0, top, W, GROUND - top + 2);
+  // far wall with bricks and arched windows
+  const fx = cam * .25;
+  c.fillStyle = th.wall; c.fillRect(0, 40, W, GROUND - 40);
+  c.fillStyle = th.mortar;
+  for (let row = 0, y = 40; y < GROUND; row++, y += 22) {
+    c.fillRect(0, y, W, 2);
+    const off = (row % 2 ? 24 : 0) - (fx % 48);
+    for (let x = off; x < W + 48; x += 48) c.fillRect(x, y, 2, 22);
+  }
+  for (let i = Math.floor(fx / 260) - 1; i < (fx + W) / 260 + 1; i++) {
+    const x = i * 260 - fx + 90;
+    c.fillStyle = 'rgba(8,6,14,.85)'; c.beginPath(); c.moveTo(x, 190); c.lineTo(x, 110); c.arc(x + 26, 110, 26, Math.PI, 0); c.lineTo(x + 52, 190); c.fill();
+    c.fillStyle = 'rgba(255,220,160,.07)'; c.fillRect(x + 4, 110, 44, 80);
+  }
+  // top of the wall fades into the sky (battlements)
+  c.fillStyle = th.sky[0];
+  for (let x = -(fx % 40); x < W; x += 40) c.fillRect(x, 28, 20, 14);
+  // pillars with torches and banners
+  const mx = cam * .55;
+  for (let i = Math.floor(mx / 330) - 1; i < (mx + W) / 330 + 1; i++) {
+    const x = i * 330 - mx + 40;
+    c.fillStyle = 'rgba(0,0,0,.25)'; c.fillRect(x + 6, 30, 40, GROUND - 30);
+    c.fillStyle = th.pillar; c.fillRect(x, 30, 40, GROUND - 30);
+    c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(x + 4, 30, 6, GROUND - 30);
+    c.fillStyle = th.mortar; c.fillRect(x - 6, 30, 52, 10); c.fillRect(x - 6, GROUND - 14, 52, 14);
+    if (i % 2 === 0) { // banner
+      c.fillStyle = th.banner; c.beginPath(); c.moveTo(x + 6, 56); c.lineTo(x + 34, 56); c.lineTo(x + 34, 128); c.lineTo(x + 20, 118); c.lineTo(x + 6, 128); c.fill();
+      c.fillStyle = 'rgba(255,231,163,.85)'; c.beginPath(); c.arc(x + 20, 84, 7, 0, Math.PI * 2); c.fill();
+    } else { // torch
+      const fl = Math.sin(T * 18 + i) * 2;
+      const tg = c.createRadialGradient(x + 20, 140, 2, x + 20, 140, 70); tg.addColorStop(0, 'rgba(255,170,60,.35)'); tg.addColorStop(1, 'rgba(255,170,60,0)');
+      c.fillStyle = tg; c.fillRect(x - 50, 70, 140, 140);
+      c.fillStyle = '#5a3a1a'; c.fillRect(x + 17, 142, 6, 18);
+      c.fillStyle = '#ffb347'; c.beginPath(); c.ellipse(x + 20, 136, 6, 10 + fl, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#fff1b0'; c.beginPath(); c.ellipse(x + 20, 139, 3, 5, 0, 0, Math.PI * 2); c.fill();
+    }
+  }
+}
+function drawFloor(c, cam, w, segs, bottom) {
+  const th = WORLDS[w];
+  c.fillStyle = '#07060b'; c.fillRect(0, GROUND, W, bottom - GROUND);
+  for (const [a, b] of segs) {
+    const x0 = a - cam, x1 = b - cam;
+    if (x1 < -20 || x0 > W + 20) continue;
+    const l = Math.max(x0, -20), r = Math.min(x1, W + 20);
+    c.fillStyle = th.stone; c.fillRect(l, GROUND, r - l, bottom - GROUND);
+    for (let tx = Math.floor((l + cam) / 20) * 20; tx < r + cam; tx += 20) {
+      const sx = tx - cam, cw = Math.min(20, x1 - sx);
+      if (sx + 20 < l || cw <= 0) continue;
+      for (let row = 0; row < 2; row++) { c.fillStyle = ((tx / 20 + row) % 2 === 0) ? th.tileA : th.tileB; c.fillRect(Math.max(sx, x0), GROUND + row * 8, Math.min(cw, x1 - Math.max(sx, x0)), 8); }
+    }
+    c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(l, GROUND, r - l, 1.5);
+    c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(l, GROUND + 16, r - l, 4);
+    if (x0 > -20) { c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(x0, GROUND, 3, bottom - GROUND); }
+    if (x1 < W + 20) { c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(x1 - 3, GROUND, 3, bottom - GROUND); }
+  }
+}
+function drawOrb(c, x, y, t) {
+  const r = 6 + Math.sin(t * 6 + x) * .8;
+  const g = c.createRadialGradient(x - 2, y - 2, 1, x, y, r + 4);
+  g.addColorStop(0, '#fff'); g.addColorStop(.35, '#d6a8ff'); g.addColorStop(.8, '#7a2fe0'); g.addColorStop(1, 'rgba(122,47,224,0)');
+  c.fillStyle = g; c.beginPath(); c.arc(x, y, r + 4, 0, Math.PI * 2); c.fill();
+}
+function drawGem(c, x, y, t) {
+  c.save(); c.translate(x, y + Math.sin(t * 3) * 3); c.shadowColor = '#2fd27a'; c.shadowBlur = 14;
+  c.fillStyle = '#2fd27a'; c.beginPath(); c.moveTo(0, -11); c.lineTo(9, 0); c.lineTo(0, 11); c.lineTo(-9, 0); c.closePath(); c.fill();
+  c.fillStyle = '#c9ffe0'; c.beginPath(); c.moveTo(0, -11); c.lineTo(4, -2); c.lineTo(-4, -2); c.closePath(); c.fill();
+  c.restore();
+}
+function drawBolt(c, x, y, t) {
+  c.save(); c.translate(x, y + Math.sin(t * 4) * 3); c.shadowColor = '#ffd23f'; c.shadowBlur = 16; c.fillStyle = '#ffd23f';
+  c.beginPath(); c.moveTo(3, -14); c.lineTo(-8, 2); c.lineTo(-1, 2); c.lineTo(-4, 14); c.lineTo(8, -3); c.lineTo(1, -3); c.closePath(); c.fill(); c.restore();
+}
+function txt(c, s, x, y, size, col, align = 'center') {
+  c.font = `${size}px 'Luckiest Guy', Impact, sans-serif`; c.textAlign = align; c.textBaseline = 'middle';
+  c.lineWidth = Math.max(3, size / 5); c.strokeStyle = '#1a0f05'; c.lineJoin = 'round'; c.strokeText(s, x, y);
+  c.fillStyle = col; c.fillText(s, x, y);
+}
+function heart(c, x, y, s, fill) {
+  c.save(); c.translate(x, y); c.scale(s, s); c.fillStyle = fill; c.strokeStyle = '#1a0f05'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(0, 4); c.bezierCurveTo(-8, -2, -6, -9, 0, -5); c.bezierCurveTo(6, -9, 8, -2, 0, 4); c.closePath(); c.fill(); c.stroke(); c.restore();
+}
+
+function render() {
+  const c = cx;
+  const top = -(H - 360);
+  c.setTransform(SC, 0, 0, SC, 0, (H - 360) * SC);
+  c.clearRect(0, top, W, H);
+  if (!G) { // attract mode behind menus
+    const cam = T * 130, w = Math.floor(T / 12) % 3;
+    drawWorld(c, cam, w, top);
+    drawFloor(c, cam, w, [[cam - 100, cam + W + 100]], 360);
+    if (!$('#shop').hidden) return;
+    drawKnight(c, W * .28, GROUND, T, S.equip, {});
+    drawEnemy(c, 'sharko', W + 60 - ((T * 190) % (W + 160)), GROUND - 12, T, {});
+    return;
+  }
+  const L = G.L, p = G.p;
+  const sh = G.shake > 0 ? (Math.random() - .5) * 8 * G.shake / .3 : 0;
+  const cam = G.cam + sh;
+  drawWorld(c, cam, L.w, top);
+  drawFloor(c, cam, L.w, L.ground, 360);
+  c.save(); c.translate(-cam, 0);
+  // platforms
+  for (const pl of L.plats) {
+    if (pl.x - cam > W || pl.x + pl.w - cam < 0) continue;
+    c.strokeStyle = '#2a2a30'; c.lineWidth = 2; c.beginPath(); c.moveTo(pl.x + 8, pl.y); c.lineTo(pl.x + 8, top); c.moveTo(pl.x + pl.w - 8, pl.y); c.lineTo(pl.x + pl.w - 8, top); c.stroke();
+    c.fillStyle = '#7a4f28'; c.fillRect(pl.x, pl.y, pl.w, 10); c.fillStyle = '#9b6a3a'; c.fillRect(pl.x, pl.y, pl.w, 3);
+    c.fillStyle = 'rgba(0,0,0,.3)'; for (let x = pl.x + 22; x < pl.x + pl.w; x += 22) c.fillRect(x, pl.y, 2, 10);
+  }
+  // spikes
+  for (const s of L.spikes) {
+    if (s.x - cam > W || s.x + s.w - cam < 0) continue;
+    for (let x = s.x; x < s.x + s.w; x += 8) {
+      c.fillStyle = '#c3c8d2'; c.beginPath(); c.moveTo(x, GROUND); c.lineTo(x + 4, GROUND - 16); c.lineTo(x + 8, GROUND); c.fill();
+      c.fillStyle = '#7c8390'; c.beginPath(); c.moveTo(x + 4, GROUND - 16); c.lineTo(x + 8, GROUND); c.lineTo(x + 5, GROUND); c.fill();
+    }
+  }
+  for (const o of L.orbs) if (!o.taken && o.x - cam > -20 && o.x - cam < W + 20) drawOrb(c, o.x, o.y, G.t);
+  for (const o of L.gems) if (!o.taken && o.x - cam > -20 && o.x - cam < W + 20) drawGem(c, o.x, o.y, G.t);
+  for (const o of L.picks) if (!o.taken && o.x - cam > -20 && o.x - cam < W + 20) drawBolt(c, o.x, o.y, G.t);
+  // finish gate
+  const fx = L.finish;
+  if (fx - cam < W + 60) {
+    c.fillStyle = '#5a3a1a'; c.fillRect(fx - 4, GROUND - 120, 8, 120); c.fillRect(fx + 76, GROUND - 120, 8, 120);
+    c.fillStyle = '#c0392b'; c.fillRect(fx - 4, GROUND - 128, 88, 26);
+    txt(c, 'W ZONE', fx + 40, GROUND - 115, 16, '#ffe7a3');
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) { c.fillStyle = (i + j) % 2 ? '#111' : '#eee'; c.fillRect(fx + 4 + i * 12, GROUND - 100 + j * 8, 12, 8); }
+  }
+  // enemies
+  for (const e of L.en) {
+    if (e.x - cam < -80 || e.x - cam > W + 80) continue;
+    if (e.dead != null && e.dead > .6) continue;
+    drawEnemy(c, e.type, e.x, e.y, e.t, { dead: e.dead != null ? e.dead : null });
+    if (e.flash > 0) { c.fillStyle = 'rgba(255,255,255,.3)'; c.beginPath(); c.arc(e.x, e.y, EN_SIZE[e.type][0] / 2, 0, Math.PI * 2); c.fill(); }
+    if (e.boss && e.dead == null) {
+      c.fillStyle = '#1a0f05'; c.fillRect(e.x - 40, e.y - 78, 80, 9);
+      c.fillStyle = '#ef4f4f'; c.fillRect(e.x - 39, e.y - 77, 78 * e.hp / e.max, 7);
+      txt(c, 'MEGA SHARKO', e.x, e.y - 90, 14, '#ffe7a3');
+    }
+  }
+  // missiles
+  for (const m of G.missiles) {
+    const g = c.createRadialGradient(m.x, m.y, 1, m.x, m.y, 12); g.addColorStop(0, '#fff'); g.addColorStop(.4, '#5ff2e6'); g.addColorStop(1, 'rgba(95,242,230,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(m.x - 6, m.y, 16, 7, 0, 0, Math.PI * 2); c.fill();
+  }
+  // knight
+  const flick = p.inv > 0 && Math.floor(p.inv * 14) % 2 === 0;
+  drawKnight(c, p.x, p.y, G.t, S.equip, { run: p.onGround && G.state === 'play', slash: p.slash, alpha: flick ? .35 : 1, glow: p.sigma > 0 ? 'rgba(255,210,63,.6)' : (G.shield > 0 && S.equip.shield === 'bubble' ? 'rgba(178,107,255,.35)' : null) });
+  for (const q of G.parts) { c.globalAlpha = Math.min(1, q.life * 2); c.fillStyle = q.col; c.fillRect(q.x - 2, q.y - 2, 4, 4); }
+  c.globalAlpha = 1;
+  for (const q of G.pops) { c.globalAlpha = Math.min(1, q.life * 2); txt(c, q.text, q.x, q.y, q.size, q.color); }
+  c.globalAlpha = 1;
+  c.restore();
+  // HUD (screen space)
+  const hy = top + 26, hx = 26;
+  for (let i = 0; i < G.maxHp; i++) heart(c, hx + i * 24, hy, 1.6, i < G.hp ? '#ef4f4f' : '#3a2a2a');
+  for (let i = 0; i < G.shield; i++) { c.fillStyle = '#4aa3ff'; c.beginPath(); c.arc(hx + G.maxHp * 24 + 6 + i * 16, hy, 6, 0, Math.PI * 2); c.fill(); }
+  drawOrb(c, W / 2 - 46, hy, T);
+  txt(c, fmt(G.runAura), W / 2 - 34, hy + 1, 20, '#fff', 'left');
+  if (G.runGems) { drawGem(c, W / 2 + 60, hy, 0); txt(c, '' + G.runGems, W / 2 + 74, hy + 1, 18, '#c9ffe0', 'left'); }
+  const prog = clamp((p.x - 120) / (L.finish - 120), 0, 1);
+  c.fillStyle = 'rgba(0,0,0,.5)'; c.fillRect(W / 2 - 80, hy + 18, 160, 6);
+  c.fillStyle = '#ffd23f'; c.fillRect(W / 2 - 80, hy + 18, 160 * prog, 6);
+  txt(c, 'LEVEL ' + G.n, hx - 8, hy + 26, 13, '#ffe7a3', 'left');
+  if (G.combo >= 2) txt(c, G.combo + 'x COMBO', W - 70, hy + 44, 16, '#ff9a3c');
+  if (G.n <= 3 && G.t < 4.5) {
+    c.globalAlpha = Math.min(1, 4.5 - G.t);
+    txt(c, 'TAP LEFT: JUMP (TWICE TO DOUBLE JUMP)', W * .25, 340, 13, '#fff');
+    txt(c, 'TAP RIGHT: SLASH', W * .75, 340, 13, '#fff');
+    c.fillStyle = 'rgba(255,255,255,.25)'; c.fillRect(W / 2 - 1, 230, 2, 120);
+    c.globalAlpha = 1;
+  }
+}
+
+/* ---------------- loop ---------------- */
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.033, (now - last) / 1000); last = now; T += dt;
+  if (G && G.state === 'play' && !paused) update(dt);
+  render();
+  if (!$('#shop').hidden) drawPreview();
+  requestAnimationFrame(frame);
+}
+
+/* ---------------- input ---------------- */
+cv.addEventListener('pointerdown', e => {
+  if (!G || G.state !== 'play') return;
+  e.preventDefault();
+  if (e.clientX < innerWidth / 2) jump(); else slash();
+});
+$('#hud').addEventListener('pointerdown', e => {
+  if (e.target.closest('button') || !G || G.state !== 'play') return;
+  if (e.clientX < innerWidth / 2) jump(); else slash();
+});
+addEventListener('keydown', e => {
+  if (!G || G.state !== 'play') return;
+  if (['Space', 'ArrowUp', 'KeyW', 'KeyZ'].includes(e.code)) { e.preventDefault(); jump(); }
+  if (['KeyX', 'KeyJ', 'ArrowRight', 'Enter'].includes(e.code)) { e.preventDefault(); slash(); }
+  if (e.code === 'Escape' || e.code === 'KeyP') pauseModal();
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && G && G.state === 'play' && !paused) pauseModal(); });
+
+/* ---------------- screens and ui ---------------- */
+let backStack = ['home'];
+function show(id, push) {
+  $$('.screen').forEach(s => s.hidden = s.id !== id);
+  if (push) backStack.push(id); else if (id === 'home') backStack = ['home'];
+  if (id !== 'hud') { G = id === 'home' || id === 'levels' || id === 'shop' || id === 'gems' ? null : G; }
+  renderBars();
+  if (id === 'levels') renderLevels();
+  if (id === 'shop') renderShop();
+  if (id === 'gems') renderPacks();
+}
+function back() { backStack.pop(); show(backStack[backStack.length - 1] || 'home'); }
+$$('[data-back]').forEach(b => b.onclick = back);
+$('#b-play').onclick = () => show('levels', true);
+$('#b-shop').onclick = () => show('shop', true);
+$('#b-gems').onclick = () => show('gems', true);
+$('#b-mute').onclick = () => { S.muted = !S.muted; save(); $('#b-mute').textContent = S.muted ? 'Sound off' : 'Sound on'; };
+$('#b-mute').textContent = S.muted ? 'Sound off' : 'Sound on';
+$('#b-pause').onclick = pauseModal;
+
+function renderBars() {
+  tickEnergy();
+  const html = `<div class="bar">
+    <span class="res"><i class="ico bolt"></i><b>${S.energy}/${maxEnergy()}</b>${S.energy < maxEnergy() ? `<small>${mmss(energyLeftMs())}</small>` : ''}<button class="plus" data-act="energy" aria-label="Get energy">+</button></span>
+    <span class="res"><i class="ico aura"></i><b>${fmt(S.aura)}</b></span>
+    <span class="res"><i class="ico gem"></i><b>${fmt(S.gems)}</b><button class="plus" data-act="gems" aria-label="Buy gems">+</button></span></div>`;
+  $$('[data-bar]').forEach(el => { el.innerHTML = html; });
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (!a) return;
+  if (a.dataset.act === 'gems') show('gems', true);
+  if (a.dataset.act === 'energy') energyModal();
+});
+setInterval(() => { if (!G) { const before = S.energy; tickEnergy(); if ($('#home').hidden === false || !$('#levels').hidden || !$('#shop').hidden || !$('#gems').hidden) renderBars(); if (before !== S.energy && !$('#levels').hidden) renderLevels(); } }, 1000);
+
+let toastT = 0;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.style.opacity = 1; clearTimeout(toastT); toastT = setTimeout(() => t.style.opacity = 0, 2200); }
+
+/* modal helper: buttons = [{label, cls, on, disabled, html}] */
+function modal(html, buttons, opts = {}) {
+  const m = $('#modal'), b = $('#mbody');
+  b.innerHTML = html + `<div class="row">${buttons.map((x, i) => `<button class="btn ${x.cls || 'dark'}" data-i="${i}" ${x.disabled ? 'disabled' : ''}>${x.label}</button>`).join('')}</div>`;
+  b.querySelectorAll('[data-i]').forEach(el => el.onclick = () => { const x = buttons[+el.dataset.i]; if (!x.keep) closeModal(); x.on && x.on(); });
+  m.hidden = false; m.onclick = opts.dismiss ? (e => { if (e.target === m) closeModal(); }) : null;
+}
+function closeModal() { $('#modal').hidden = true; }
+
+/* ---------------- ads (simulated) ---------------- */
+function canWatchAd() { dailyReset(); return S.adsToday < AD_CAP; }
+function showAd(kind, done) {
+  // kind: 'rewarded' (reward after it finishes) or 'forced' (interstitial between levels)
+  if (kind === 'rewarded' && !canWatchAd()) { toast('Daily ad limit reached. Come back tomorrow, or skip the wait with gems.'); return; }
+  send({ type: 'ad', kind });
+  const ad = FAKE_ADS[Math.floor(Math.random() * FAKE_ADS.length)];
+  const el = $('#ad'), close = $('#ad-close'), bar = $('#ad-bar');
+  el.style.background = `linear-gradient(135deg, ${ad.bg[0]}, ${ad.bg[1]})`;
+  $('#ad-brand').textContent = ad.brand; $('#ad-line').textContent = ad.line; $('#ad-cta').textContent = ad.cta;
+  $('#ad-label').textContent = kind === 'rewarded' ? 'Ad · simulated · reward after the countdown' : 'Ad · simulated · VIP removes these';
+  el.hidden = false;
+  const dur = kind === 'rewarded' ? 5 : 4, t0 = performance.now();
+  const ac = $('#ad-cv').getContext('2d');
+  let raf = 0;
+  const tick = () => {
+    const s = (performance.now() - t0) / 1000;
+    ac.setTransform(1, 0, 0, 1, 0, 0); ac.clearRect(0, 0, 360, 360);
+    ac.fillStyle = 'rgba(255,255,255,.12)'; ac.beginPath(); ac.arc(180, 180, 150 + Math.sin(s * 4) * 6, 0, Math.PI * 2); ac.fill();
+    if (ad.mascot === 'knight') drawKnight(ac, 180, 280, s, S.equip, { scale: 3.6 });
+    else drawEnemy(ac, ad.mascot, 180, 190, s, { scale: 5.5 });
+    bar.style.width = Math.min(100, s / dur * 100) + '%';
+    const left = Math.max(0, Math.ceil(dur - s));
+    if (left > 0) { close.disabled = true; close.textContent = kind === 'rewarded' ? `Reward in ${left}` : `Skip in ${left}`; }
+    else { close.disabled = false; close.textContent = kind === 'rewarded' ? 'Claim reward ✕' : 'Close ✕'; }
+    raf = requestAnimationFrame(tick);
+  };
+  tick();
+  $('#ad-cta').onclick = () => toast('This is a pretend ad. Nothing to install.');
+  close.onclick = () => {
+    if (close.disabled) return;
+    cancelAnimationFrame(raf); el.hidden = true;
+    if (kind === 'rewarded') { S.adsToday++; save(); }
+    done && done();
+  };
+}
+
+/* ---------------- purchases (simulated) ---------------- */
+function buyReal(pack, done) {
+  modal(`<h2>${pack.label}</h2><p>${pack.desc}</p><p style="font-size:12px;color:var(--muted)">Demo purchase. No money is charged. In the App Store build this opens Apple's payment sheet.</p>`,
+    [{ label: 'Cancel' }, { label: `Pay ${pack.price}`, cls: 'green', on: () => { send({ type: 'purchase', sku: pack.id }); done(); save(); renderBars(); } }], { dismiss: true });
+}
+
+/* ---------------- level select ---------------- */
+let worldTab = 0;
+function renderLevels() {
+  const unlockedWorld = Math.floor(S.cleared / 10);
+  $('#worlds').innerHTML = WORLDS.map((w, i) => `<button class="tab" role="tab" aria-selected="${i === worldTab}" data-w="${i}" ${i > unlockedWorld ? 'disabled' : ''}>${i + 1}. ${w.name}</button>`).join('');
+  $$('#worlds [data-w]').forEach(b => b.onclick = () => { worldTab = +b.dataset.w; renderLevels(); });
+  $('#wname').innerHTML = `${WORLDS[worldTab].name} <span>${WORLDS[worldTab].note}</span>`;
+  let h = '';
+  for (let i = 1; i <= 10; i++) {
+    const n = worldTab * 10 + i, st = S.stars[n] || 0, locked = n > S.cleared + 1;
+    h += `<button class="lvl ${locked ? 'locked' : ''} ${n % 10 === 0 ? 'boss' : ''}" data-l="${n}" ${locked ? 'aria-disabled="true"' : ''} aria-label="Level ${n}${locked ? ', locked' : ''}">
+      ${locked ? '🔒' : n}<span class="s">${[1, 2, 3].map(k => `<i class="star ${k <= st ? 'on' : ''}"></i>`).join('')}</span></button>`;
+  }
+  $('#lgrid').innerHTML = h;
+  $$('#lgrid [data-l]').forEach(b => b.onclick = () => {
+    const n = +b.dataset.l;
+    if (n > S.cleared + 1) { toast('Clear level ' + (S.cleared + 1) + ' first.'); return; }
+    startLevel(n);
+  });
+}
+
+/* ---------------- run modals ---------------- */
+function pauseModal() {
+  if (!G || G.state !== 'play') return;
+  paused = true;
+  modal(`<h2>Paused</h2><p>Quitting now loses the ${fmt(G.runAura)} aura from this run and the energy you spent.</p>`,
+    [{ label: 'Quit', on: () => { G = null; paused = false; show('levels'); } }, { label: 'Resume', cls: 'green', on: () => { paused = false; } }]);
+}
+function reviveModal() {
+  const cost = 10 * Math.pow(2, G.revives);
+  modal(`<h2>You lost your aura</h2><p>Revive now and keep the <b>${fmt(G.runAura)}</b> aura you farmed this run. Give up and it's gone.</p>`, [
+    { label: `Revive <i class="ico gem"></i> ${cost}`, cls: 'gem' + (S.gems < cost ? ' poor' : ''), on: () => {
+      if (S.gems < cost) { toast('Not enough gems.'); show('gems', true); G = null; return; }
+      S.gems -= cost; save(); revive(); } },
+    { label: `<i class="ico ad">AD</i> Watch ad to revive`, cls: 'ad', disabled: G.adRevive, on: () => showAd('rewarded', () => { G.adRevive = true; revive(); }) },
+    { label: 'Give up', on: () => { G = null; show('levels'); } },
+  ]);
+}
+function revive() {
+  G.revives++; G.hp = G.maxHp; G.state = 'play';
+  const p = G.p; p.inv = 2;
+  if (p.y > GROUND + 4) respawnAhead();
+  G.L.en.forEach(e => { if (e.dead == null && !e.boss && e.x > p.x - 40 && e.x < p.x + 260) { e.dead = 0; } });
+  pop('BACK FROM THE DEAD', p.x + 40, p.y - 90, '#ffe7a3', 22);
+}
+function win() {
+  G.state = 'won'; sfx('win');
+  const L = G.L, pct = L.orbs.length ? G.orbsTaken / L.orbs.length : 1;
+  const stars = 1 + (pct >= .5 ? 1 : 0) + (pct >= .8 && G.hits <= 1 ? 1 : 0);
+  const bonus = (50 + G.n * 15) * (S.vip ? 2 : 1);
+  const earned = G.runAura + bonus, n = G.n, gems = G.runGems;
+  S.aura += earned; S.gems += gems; S.stars[n] = Math.max(S.stars[n] || 0, stars); S.cleared = Math.max(S.cleared, n); S.sinceAd++;
+  save();
+  let doubled = false;
+  const go = (next) => {
+    const cont = () => { G = null; if (next && n < LEVELS) startLevel(n + 1); else { worldTab = Math.floor(Math.min(n, LEVELS - 1) / 10); show('levels'); } };
+    if (!S.vip && S.sinceAd >= 3) { S.sinceAd = 0; save(); showAd('forced', cont); } else cont();
+  };
+  const render = () => modal(`<h2>Level ${n} cleared</h2>
+    <div class="big-stars">${[1, 2, 3].map(k => `<i class="star ${k <= stars ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="tally">
+      <span>Aura farmed</span><b><i class="ico aura"></i>${fmt(G.runAura)}</b>
+      <span>Clear bonus${S.vip ? ' (VIP x2)' : ''}</span><b><i class="ico aura"></i>${fmt(bonus)}</b>
+      ${gems ? `<span>Gems found</span><b><i class="ico gem"></i>${gems}</b>` : ''}
+      ${doubled ? `<span>Ad bonus</span><b><i class="ico aura"></i>${fmt(earned)}</b>` : ''}
+    </div>`, [
+    { label: doubled ? 'Doubled ✓' : `<i class="ico ad">AD</i> Double to ${fmt(earned * 2)}`, cls: 'ad', disabled: doubled, keep: true, on: () => showAd('rewarded', () => { doubled = true; S.aura += earned; save(); renderBars(); render(); }) },
+    { label: 'Levels', on: () => go(false) },
+    { label: n < LEVELS ? 'Next level' : 'Finish', cls: 'green', on: () => go(true) },
+  ]);
+  setTimeout(render, 500);
+}
+function energyModal() {
+  tickEnergy();
+  const full = S.energy >= maxEnergy();
+  modal(`<h2>Energy</h2><p>${full ? 'Your energy is full.' : `You have ${S.energy} of ${maxEnergy()}. The next one arrives in ${mmss(energyLeftMs())}.`}</p>`, [
+    { label: `Refill <i class="ico gem"></i> 30`, cls: 'gem' + (S.gems < 30 ? ' poor' : ''), disabled: full, on: () => { if (S.gems < 30) { toast('Not enough gems.'); show('gems', true); return; } S.gems -= 30; S.energy = maxEnergy(); save(); renderBars(); toast('Energy refilled.'); } },
+    { label: `<i class="ico ad">AD</i> +1 energy`, cls: 'ad', disabled: full, on: () => showAd('rewarded', () => { S.energy = Math.min(maxEnergy(), S.energy + 1); save(); renderBars(); toast('+1 energy'); }) },
+    { label: 'Close' },
+  ], { dismiss: true });
+}
+
+/* ---------------- armory ---------------- */
+let shopCat = 'all', shopIdx = 0, pvCtx = null, icCtx = null;
+const shopList = () => ITEMS.filter(i => shopCat === 'all' || i.cat === shopCat);
+function sizeCanvas(cvs) { const r = cvs.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1); const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr)); if (cvs.width !== w || cvs.height !== h) { cvs.width = w; cvs.height = h; } return [w, h]; }
+function tryOnEquip() { const it = shopList()[shopIdx]; return it ? Object.assign({}, S.equip, { [it.cat]: it.id }) : S.equip; }
+function drawPreview() {
+  const pv = $('#pv'); const [w, h] = sizeCanvas(pv); pvCtx = pvCtx || pv.getContext('2d');
+  const c = pvCtx; c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, w, h);
+  const s = Math.min(w / 110, h / 115);
+  const fy = h * .8;
+  c.fillStyle = 'rgba(0,0,0,.35)'; c.beginPath(); c.ellipse(w / 2, fy, 30 * s, 6 * s, 0, 0, Math.PI * 2); c.fill();
+  drawKnight(c, w / 2 - 4 * s, fy, T, tryOnEquip(), { run: false, scale: s, slash: (T % 2.4) < .18 ? .18 - (T % 2.4) : 0 });
+  const ic = $('#icon'); const [iw, ih] = sizeCanvas(ic); icCtx = icCtx || ic.getContext('2d');
+  const d = icCtx; d.setTransform(1, 0, 0, 1, 0, 0); d.clearRect(0, 0, iw, ih);
+  const it = shopList()[shopIdx]; if (!it) return;
+  const k = ih / 60;
+  d.save(); d.translate(iw / 2, ih / 2);
+  if (it.cat === 'sword') { d.scale(k * 1.5, k * 1.5); d.rotate(Math.PI / 2 + Math.sin(T * 2) * .08); d.translate(0, 16); drawSword(d, it.id); }
+  else if (it.cat === 'shield') { d.scale(k, k); if (it.id === 'noshield') { d.strokeStyle = '#666'; d.lineWidth = 3; d.beginPath(); d.arc(0, 0, 16, 0, Math.PI * 2); d.moveTo(-11, 11); d.lineTo(11, -11); d.stroke(); } else drawShield(d, it.id, 20); }
+  else { d.restore(); d.save(); const eq = Object.assign({}, S.equip, { [it.cat]: it.id }); drawKnight(d, iw / 2, ih * .95, T, eq, { run: false, scale: k * .9 }); }
+  d.restore();
+}
+function renderShop() {
+  const list = shopList(); shopIdx = clamp(shopIdx, 0, list.length - 1);
+  const it = list[shopIdx];
+  $('#cats').innerHTML = CATS.map(([k, l]) => `<button class="tab" role="tab" aria-selected="${k === shopCat}" data-c="${k}">${l}</button>`).join('');
+  $$('#cats [data-c]').forEach(b => b.onclick = () => { shopCat = b.dataset.c; shopIdx = 0; renderShop(); });
+  $('#count').textContent = `${shopIdx + 1} / ${list.length}`;
+  $('#iname').textContent = it.name; $('#idesc').textContent = it.desc;
+  const owned = !!S.owned[it.id], equipped = S.equip[it.cat] === it.id;
+  const tag = $('#tag'); tag.hidden = !(owned || it.p2w); tag.className = 'tag ' + (owned ? 'own' : 'p2w'); tag.textContent = owned ? 'OWNED' : 'PAY TO WIN';
+  const g = gearWith(tryOnEquip());
+  $('#stats').innerHTML = `<span>♥ ${g.hearts} hearts</span><span>Reach ${g.sword.range}</span><span>${(1 / g.sword.cd).toFixed(1)} slashes/s</span>${g.sword.missiles ? `<span>${g.sword.missiles} missile${g.sword.missiles > 1 ? 's' : ''}</span>` : ''}${g.sword.auto ? '<span>Auto-slash</span>' : ''}${g.blocks ? `<span>Blocks ${g.blocks}</span>` : ''}${g.mult > 1 ? `<span>x${g.mult} aura</span>` : ''}`;
+  const buy = $('#buy'); let h = '';
+  if (equipped) h = `<button class="btn dark" disabled>Equipped</button>`;
+  else if (owned) h = `<button class="btn green" data-b="equip">Equip</button>`;
+  else {
+    const p = it.price;
+    if (p.aura) h += `<button class="btn green ${S.aura < p.aura ? 'poor' : ''}" data-b="aura"><i class="ico aura"></i>${fmt(p.aura)}</button>`;
+    if (p.gems) h += `<button class="btn gem ${S.gems < p.gems ? 'poor' : ''}" data-b="gems"><i class="ico gem"></i>${fmt(p.gems)}</button>`;
+    if (p.ads) { const done = S.adProg[it.id] || 0; h += `<button class="btn ad adbtn" data-b="ad"><span><i class="ico ad">AD</i> Watch ads ${done}/${p.ads}</span><span class="meter"><i style="width:${done / p.ads * 100}%"></i></span></button>`; }
+  }
+  buy.innerHTML = h;
+  buy.querySelectorAll('[data-b]').forEach(b => b.onclick = () => shopAction(it, b.dataset.b));
+  drawPreview();
+}
+function gearWith(eq) { const ar = byId[eq.armor].s; return { sword: byId[eq.sword].s, hearts: ar.hearts, mult: ar.mult * (S.vip ? 2 : 1), blocks: byId[eq.shield].s.blocks }; }
+function grant(it) { S.owned[it.id] = 1; S.equip[it.cat] = it.id; save(); sfx('win'); toast(`${it.name} unlocked and equipped.`); renderBars(); renderShop(); }
+function shopAction(it, how) {
+  const p = it.price;
+  if (how === 'equip') { S.equip[it.cat] = it.id; save(); renderShop(); return; }
+  if (how === 'aura') {
+    if (S.aura < p.aura) {
+      const need = p.aura - S.aura;
+      modal(`<h2>Not enough aura</h2><p>You need ${fmt(need)} more aura. Farm it in levels${p.gems ? ', buy it with gems' : ''}${p.ads ? ', or unlock it with ads' : ''}.</p>`, [{ label: 'OK' }, ...(p.gems ? [{ label: 'Get gems', cls: 'gem', on: () => show('gems', true) }] : [])], { dismiss: true });
+      return;
+    }
+    S.aura -= p.aura; grant(it); return;
+  }
+  if (how === 'gems') {
+    if (S.gems < p.gems) { toast(`You need ${fmt(p.gems - S.gems)} more gems.`); show('gems', true); return; }
+    S.gems -= p.gems; grant(it); return;
+  }
+  if (how === 'ad') showAd('rewarded', () => {
+    S.adProg[it.id] = (S.adProg[it.id] || 0) + 1; save();
+    if (S.adProg[it.id] >= p.ads) grant(it); else { toast(`${S.adProg[it.id]} of ${p.ads} ads watched for ${it.name}.`); renderShop(); }
+  });
+}
+$('#prev').onclick = () => { const n = shopList().length; shopIdx = (shopIdx - 1 + n) % n; renderShop(); };
+$('#next').onclick = () => { const n = shopList().length; shopIdx = (shopIdx + 1) % n; renderShop(); };
+
+/* ---------------- gem shop ---------------- */
+const STARTER_MS = 24 * 3600 * 1000;
+function renderPacks() {
+  dailyReset();
+  const starterLeft = STARTER_MS - (Date.now() - S.firstSeen);
+  const list = PACKS.filter(p => !(p.starter && (S.starter || starterLeft <= 0)) && !(p.vip && S.vip));
+  $('#packs').innerHTML = list.map(p => `<div class="pack ${p.ribbon ? 'hot' : ''}">
+    ${p.ribbon ? `<span class="ribbon">${p.ribbon}</span>` : ''}
+    <h3 style="font-size:18px">${p.label}</h3>
+    ${p.gems ? `<div class="amt"><i class="ico gem"></i>${fmt(p.gems)}</div>` : `<div class="amt" style="color:#ffd23f">VIP</div>`}
+    <p>${p.desc}${p.starter ? `<br><span class="timer">Ends in ${hm(starterLeft)}</span>` : ''}</p>
+    ${p.ad ? `<button class="btn ad" data-p="${p.id}" ${S.freeGemAds >= 5 ? 'disabled' : ''}><i class="ico ad">AD</i> ${S.freeGemAds}/5 today</button>` : `<button class="btn green" data-p="${p.id}">${p.price}</button>`}
+  </div>`).join('');
+  $$('#packs [data-p]').forEach(b => b.onclick = () => {
+    const p = PACKS.find(x => x.id === b.dataset.p);
+    if (p.ad) return showAd('rewarded', () => { S.freeGemAds++; S.gems += p.gems; save(); toast(`+${p.gems} gems`); renderBars(); renderPacks(); });
+    buyReal(p, () => {
+      if (p.gems) S.gems += p.gems;
+      if (p.starter) { S.starter = true; S.owned.katana = 1; S.equip.sword = 'katana'; S.energy = maxEnergy(); }
+      if (p.vip) { S.vip = true; S.energy = maxEnergy(); }
+      toast(p.vip ? 'VIP active. No more forced ads.' : `+${fmt(p.gems)} gems`); renderPacks();
+    });
+  });
+}
+
+/* ---------------- boot ---------------- */
+function start() {
+  dailyReset(); resize(); show('home');
+  requestAnimationFrame(t => { last = t; frame(t); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!$('#shop').hidden) renderShop(); });
+}
+start();
+</script>
